@@ -1,6 +1,8 @@
 {
     "name": "SimpleDialogSystem.Editor",
-    "references": [],
+    "references": [
+        "GUID:3a427c3c9853f6a45afa0ee5d310c78b"
+    ],
     "includePlatforms": [
         "Editor"
     ],
