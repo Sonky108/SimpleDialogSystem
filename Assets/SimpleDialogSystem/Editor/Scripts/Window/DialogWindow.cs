@@ -1,4 +1,5 @@
 ﻿using System;
+using System.CodeDom;
 using System.Collections.Generic;
 using SimpleDialogSystem.Editor.Scripts.Nodes;
 using SimpleDialogSystem.Runtime.Data;
@@ -22,11 +23,42 @@ namespace SimpleDialogSystem.Editor.Scripts.Window
 			Data = dialogData;
 
 			_background = new Background();
-			_background.NewNodeRequested += (position) => CreateLineNode(position);
+			_background.NewNodeRequested += OnNewNodeRequested;
 			
 			_inputables.Add(_background);
 
 			CreateLineNode(Data.OpeningLine.Position, Data.OpeningLine);
+
+			foreach (var x in Data.OpeningLine.Response)
+			{
+				CreateResponseNode(x.Position, x);
+			}
+		}
+
+		private void OnNewNodeRequested(Vector2 position, NodeTypes nodeTypes)
+		{
+			switch (nodeTypes)
+			{
+				case NodeTypes.Line:
+					CreateLineNode(position, new Line());
+					break;
+				case NodeTypes.Response:
+					CreateResponseNode(position, new Response());
+					break;
+			}
+		}
+
+		private void CreateResponseNode(Vector2 position, Response response)
+		{
+			ResponseNode newResponse = new ResponseNode(position, Settings.ResponseNode.Width, Settings.ResponseNode.Height);
+
+			newResponse.SetContent(response);
+			newResponse.RepaintNeeded += RepaintNeeded;
+
+			_inputables.Add(newResponse);
+			_drawables.Add(newResponse);
+			
+			RepaintNeeded?.Invoke();
 		}
 
 		public void Draw(Event current)

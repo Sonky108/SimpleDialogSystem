@@ -32,5 +32,11 @@ namespace SimpleDialogSystem.Editor.Scripts
 			public static int Width = 100;
 			public static int Height = 100;
 		}
+		
+		public static class ResponseNode
+		{
+			public static int Width = 200;
+			public static int Height = 100;
+		}
 	}
 }

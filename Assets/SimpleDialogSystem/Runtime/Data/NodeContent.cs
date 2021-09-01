@@ -3,9 +3,8 @@
 namespace SimpleDialogSystem.Runtime.Data
 {
 	[System.Serializable]
-	public class Response : NodeContent
+	public class NodeContent
 	{
-		public string Message;
-		public Line Line;
+		public Vector2 Position;
 	}
 }

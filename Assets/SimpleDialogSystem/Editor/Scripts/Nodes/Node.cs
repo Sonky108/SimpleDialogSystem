@@ -1,18 +1,20 @@
 ﻿using System;
 using System.Collections.Generic;
+using SimpleDialogSystem.Runtime.Data;
 using UnityEngine;
 
 namespace SimpleDialogSystem.Editor.Scripts.Nodes
 {
-	public abstract class Node<T> : IInputHolder, IInputable, IDrawable
+	public abstract class Node<T> : IInputHolder, IInputable, IDrawable where T : NodeContent
 	{
-		protected T Content;
 		protected GUIContent Title;
 		protected GUIStyle GUIStyle;
-		protected Rect Rect;
+		protected T Content;
 		private readonly Draggable _draggableTitle;
 		private readonly List<IInputHolder> _inputs = new List<IInputHolder>();
+		private Rect _rect;
 		private Rect _titleRect;
+		private Rect _contentRect;
 
 		public Node(Vector2 position, float width, float height, GUIStyle style = default)
 		{
@@ -21,8 +23,9 @@ namespace SimpleDialogSystem.Editor.Scripts.Nodes
 				GUIStyle = style;
 			}
 
-			Rect = new Rect(position, new Vector2(width, height));
+			_rect = new Rect(position, new Vector2(width, height));
 			_titleRect = new Rect(position, new Vector2(width, Settings.TitleHeight));
+			_contentRect = new Rect(new Vector2(position.x, position.y + Settings.TitleHeight), new Vector2(width, height - Settings.TitleHeight));
 
 			_draggableTitle = new Draggable(_titleRect, Drag);
 
@@ -44,27 +47,17 @@ namespace SimpleDialogSystem.Editor.Scripts.Nodes
 			return false;
 		}
 
+		public bool CanUseInput(Event current)
+		{
+			return _rect.Contains(current.mousePosition);
+		}
+
 		public void Clear()
 		{
-			foreach (var x in _inputs)
+			foreach (IInputHolder x in _inputs)
 			{
 				x.Clear();
 			}
-		}
-
-		public virtual void SetTitle(GUIContent title)
-		{
-			Title = title;
-		}
-
-		public virtual void SetContent(T content)
-		{
-			Content = content;
-		}
-		
-		public bool CanUseInput(Event current)
-		{
-			return Rect.Contains(current.mousePosition);
 		}
 
 		public void ProcessInput(Event current)
@@ -79,20 +72,38 @@ namespace SimpleDialogSystem.Editor.Scripts.Nodes
 			DrawContent(Content);
 		}
 
+		public Rect GetContentRect()
+		{
+			return _contentRect;
+		}
+
+		public virtual void SetTitle(GUIContent title)
+		{
+			Title = title;
+		}
+
+		public virtual void SetContent(T content)
+		{
+			Content = content;
+		}
+
 		public abstract void DrawContent(T content);
 
 		private void Drag(Vector2 delta)
 		{
-			Rect.position += delta;
+			_rect.position += delta;
 			_titleRect.position += delta;
-			_draggableTitle.UpdateDragArea(_titleRect);
+			_contentRect.position += delta;
+			Content.Position += delta;
 			
+			_draggableTitle.UpdateDragArea(_titleRect);
+
 			RepaintNeeded?.Invoke();
 		}
 
 		private void DrawBackground()
 		{
-			GUI.Box(Rect, GUIContent.none, Settings.BackgroundStyle);
+			GUI.Box(_rect, GUIContent.none, Settings.BackgroundStyle);
 		}
 
 		private void DrawTitle()

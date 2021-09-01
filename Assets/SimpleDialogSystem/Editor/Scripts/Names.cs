@@ -4,7 +4,8 @@
 	{
 		public static class ContextMenu
 		{
-			public static string AddNode = "Add node";
+			public static string AddLineNode = "Add line node";
+			public static string AddResponseNode = "Add response node";
 		}
 	}
 }

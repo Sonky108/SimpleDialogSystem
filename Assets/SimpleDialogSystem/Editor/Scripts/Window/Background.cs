@@ -1,5 +1,6 @@
 ﻿using System;
 using SimpleDialogSystem.Editor.Scripts.Nodes;
+using SimpleDialogSystem.Runtime.Data;
 using UnityEngine;
 
 namespace SimpleDialogSystem.Editor.Scripts.Window
@@ -12,10 +13,11 @@ namespace SimpleDialogSystem.Editor.Scripts.Window
 		public Background()
 		{
 			_contextMenu = new ContextMenu();
-			_contextMenu.AddAction(Names.ContextMenu.AddNode, () => NewNodeRequested?.Invoke(_lastEvent.mousePosition));
+			_contextMenu.AddAction(Names.ContextMenu.AddLineNode, () => NewNodeRequested?.Invoke(_lastEvent.mousePosition, NodeTypes.Line));
+			_contextMenu.AddAction(Names.ContextMenu.AddResponseNode, () => NewNodeRequested?.Invoke(_lastEvent.mousePosition, NodeTypes.Response));
 		}
 
-		public event Action<Vector2> NewNodeRequested;
+		public event Action<Vector2, NodeTypes> NewNodeRequested;
 
 		public bool IsHoldingInput()
 		{
