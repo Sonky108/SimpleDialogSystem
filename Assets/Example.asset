@@ -13,18 +13,18 @@ MonoBehaviour:
   m_Name: Example
   m_EditorClassIdentifier: 
   OpeningLine:
+    Position: {x: 281, y: 235}
     Message: Line
     Response:
-    - Message: response
+    - Position: {x: 469, y: 204}
+      Message: response
       Line:
+        Position: {x: 0, y: 0}
         Message: 
         Response: []
-        Position: {x: 0, y: 0}
-      Position: {x: 400, y: 400}
-    - Message: response2
+    - Position: {x: 803, y: 231}
+      Message: response2
       Line:
+        Position: {x: 0, y: 0}
         Message: 
         Response: []
-        Position: {x: 0, y: 0}
-      Position: {x: 450, y: 500}
-    Position: {x: 150, y: 250}
