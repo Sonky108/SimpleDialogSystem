@@ -8,16 +8,18 @@ using ContextMenu = SimpleDialogSystem.Editor.Scripts.NodeEditor.Utils.ContextMe
 
 namespace SimpleDialogSystem.Editor.Scripts.NodeEditor.Base
 {
-	public abstract class Port : IInputable, IDrawable, IInputHolder
+	public abstract class Port : IInputtable, IDrawable, IInputHolder
 	{
 		private readonly ContextMenu _contextMenu;
 		private readonly Draggable _draggable;
 		private readonly List<Port> _connectedPorts;
 		private Rect _rect;
 
-		public Port(float x, float y)
+		public Port(float x, float y, Node owner)
 		{
 			_rect = new Rect(x, y, Settings.PortHeight, Settings.PortHeight);
+
+			Owner = owner;
 
 			_connectedPorts = new List<Port>();
 
@@ -26,12 +28,33 @@ namespace SimpleDialogSystem.Editor.Scripts.NodeEditor.Base
 			_draggable.DragEnded += OnDragEnded;
 
 			_contextMenu = new ContextMenu();
-			_contextMenu.AddAction(Names.ClearAllConnections, () => { _connectedPorts.Clear(); });
+			_contextMenu.AddAction(Names.ClearAllConnections, ClearAllConnections);
 		}
 
-		public event Action<Port> DragStarted;
-		public event Action<Port> DragEnded;
+		private void ClearAllConnections()
+		{
+			foreach (var x in _connectedPorts)
+			{
+				ConnectionRemoved?.Invoke(x);
+				x.RemoveConnection(this);
+			}
+			
+			_connectedPorts.Clear();
+		}
+
+		public void RemoveConnection(Port port)
+		{
+			if (_connectedPorts.Remove(port))
+			{
+				ConnectionRemoved?.Invoke(port);
+			}
+		}
+		
+		public event Action<Port, Event> DragEnded;
 		public event Action<Port, Event> Drag;
+		public event Action<Port, Port> PortsConnected;
+		public event Action<Port> DragStarted;
+		public event Action<Port> ConnectionRemoved;
 		public int InputPriority => Utils.InputPriority.PORT;
 
 		public bool CanUseInput(Event current)
@@ -42,6 +65,27 @@ namespace SimpleDialogSystem.Editor.Scripts.NodeEditor.Base
 		public bool IsHoldingInput()
 		{
 			return _draggable.IsHoldingInput();
+		}
+
+		public void OnDragged(IUserInputtable userInputtable)
+		{
+			if (this is InputPort inputPort && userInputtable is OutputPort outputPort)
+			{
+				if (inputPort.Owner != outputPort.Owner)
+				{
+					PortsConnected?.Invoke(inputPort, outputPort);
+					outputPort.PortsConnected?.Invoke(inputPort, outputPort);
+				}
+			}
+
+			if (this is OutputPort output && userInputtable is InputPort input)
+			{
+				if (input.Owner != output.Owner)
+				{
+					PortsConnected?.Invoke(input, output);
+					input.PortsConnected?.Invoke(input, output);
+				}
+			}
 		}
 
 		public void ProcessInput(Event current)
@@ -61,10 +105,11 @@ namespace SimpleDialogSystem.Editor.Scripts.NodeEditor.Base
 
 		public void Draw()
 		{
-			GUI.Box(_rect, GUIContent.none, Settings.PortStyle);
+			GUI.Box(_rect, new GUIContent(_connectedPorts.Count.ToString()), Settings.PortStyle);
 		}
 
 		public void Clear() { }
+		public Node Owner { get; }
 		public Vector2 Position
 		{
 			get => _rect.position;
@@ -75,14 +120,26 @@ namespace SimpleDialogSystem.Editor.Scripts.NodeEditor.Base
 			}
 		}
 
-		public void ConnectPort(Port port)
+		public bool IsConnectedTo(Port port)
 		{
-			if (_connectedPorts.Contains(port))
+			return _connectedPorts.Contains(port);
+		}
+		
+		public bool ConnectPort(Port port)
+		{
+			if (IsConnectedTo(port))
 			{
-				return;
+				return false;
+			}
+			
+			_connectedPorts.Add(port);
+
+			if (!port.IsConnectedTo(this))
+			{
+				port.ConnectPort(this);
 			}
 
-			_connectedPorts.Add(port);
+			return true;
 		}
 
 		private void OnDragStarted()
@@ -90,14 +147,26 @@ namespace SimpleDialogSystem.Editor.Scripts.NodeEditor.Base
 			DragStarted?.Invoke(this);
 		}
 
-		private void OnDragEnded()
+		private void OnDragEnded(Event current)
 		{
-			DragEnded?.Invoke(this);
+			DragEnded?.Invoke(this, current);
 		}
 
 		private void OnDrag(Event current)
 		{
 			Drag?.Invoke(this, current);
+		}
+
+		public List<Node> GetConnectedNodes()
+		{
+			var result = new List<Node>();
+			
+			foreach (var x in _connectedPorts)
+			{
+				result.Add(x.Owner);
+			}
+
+			return result;
 		}
 	}
 }

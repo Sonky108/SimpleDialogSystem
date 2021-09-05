@@ -5,7 +5,7 @@ using Settings = SimpleDialogSystem.Editor.Scripts.NodeEditor.Utils.Settings;
 
 namespace SimpleDialogSystem.Editor.Scripts.NodeEditor.Base
 {
-	public class Background : IInputable, IInputHolder, IDrawable
+	public class Background : IInputtable, IInputHolder, IDrawable
 	{
 		protected readonly ContextMenu ContextMenu;
 		protected Event LastEvent;
@@ -25,6 +25,11 @@ namespace SimpleDialogSystem.Editor.Scripts.NodeEditor.Base
 		public bool CanUseInput(Event current)
 		{
 			return true;
+		}
+
+		public void OnDragged(IUserInputtable userInputtable)
+		{
+			
 		}
 
 		public void Draw()

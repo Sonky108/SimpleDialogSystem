@@ -1,4 +1,6 @@
 ﻿namespace SimpleDialogSystem.Editor.Scripts.NodeEditor.Interfaces
 {
-	public interface IInputable : IInputUser, IInputProcessor { }
+	public interface IInputtable : IUserInputtable, IInputProcessor
+	{
+	}
 }

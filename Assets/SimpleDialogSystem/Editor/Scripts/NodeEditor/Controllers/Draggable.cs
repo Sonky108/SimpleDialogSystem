@@ -19,7 +19,7 @@ namespace SimpleDialogSystem.Editor.Scripts.NodeEditor.Controllers
 		}
 
 		public event Action DragStarted;
-		public event Action DragEnded;
+		public event Action<Event> DragEnded;
 		public int InputPriority { get; }
 
 		public bool IsHoldingInput()
@@ -46,7 +46,7 @@ namespace SimpleDialogSystem.Editor.Scripts.NodeEditor.Controllers
 			if (current.type == EventType.MouseUp)
 			{
 				_isDragging = false;
-				DragEnded?.Invoke();
+				DragEnded?.Invoke(current);
 			}
 
 			if (_isDragging && current.type == EventType.MouseDrag)

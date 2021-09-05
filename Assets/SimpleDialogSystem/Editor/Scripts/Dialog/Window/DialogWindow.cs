@@ -2,96 +2,50 @@
 using System.Collections.Generic;
 using SimpleDialogSystem.Editor.Scripts.Dialog.Nodes;
 using SimpleDialogSystem.Editor.Scripts.NodeEditor.Base;
-using SimpleDialogSystem.Editor.Scripts.NodeEditor.Controllers;
 using SimpleDialogSystem.Editor.Scripts.NodeEditor.Interfaces;
 using SimpleDialogSystem.Editor.Scripts.NodeEditor.Utils;
 using SimpleDialogSystem.Runtime.Data;
 using SimpleDialogSystem.Runtime.Data.ScriptableObjects;
-using UnityEditorInternal;
 using UnityEngine;
+using Background = SimpleDialogSystem.Editor.Scripts.Dialog.Controller.Background;
 
 namespace SimpleDialogSystem.Editor.Scripts.Dialog.Window
 {
 	public class DialogWindow
 	{
 		public DialogData Data;
+		private readonly Background _background;
 		private readonly SortedSet<IDrawable> _drawables = new SortedSet<IDrawable>(new DrawableComparer());
-		private readonly SortedSet<IInputable> _inputables = new SortedSet<IInputable>(new InputUsersComparer());
-		private readonly Controller.Background _background;
+		private readonly SortedSet<IInputtable> _inputables = new SortedSet<IInputtable>(new InputUsersComparer());
 		private IInputHolder _currentInputHolder;
 
-		public event Action RepaintNeeded;
-		
 		public DialogWindow(DialogData dialogData)
 		{
 			Data = dialogData;
-			
-			_background = new Controller.Background();
+
+			_background = new Background();
 			_background.NewNodeRequested += OnNewNodeRequested;
 
-			temporaryCurve = new Curve(Vector2.zero, Vector2.zero);
-			
+			TemporaryCurve = new Curve(Vector2.zero, Vector2.zero);
+
 			_inputables.Add(_background);
 			_drawables.Add(_background);
-			_drawables.Add(temporaryCurve);
-			
-			CreateLineNode(Data.OpeningLine.Position, Data.OpeningLine);
+			_drawables.Add(TemporaryCurve);
 
-			foreach (var x in Data.OpeningLine.Response)
+			var lineNode = CreateLineNode(Data.OpeningLine.Position, Data.OpeningLine);
+
+			foreach (Response x in Data.OpeningLine.Response)
 			{
-				CreateResponseNode(x.Position, x);
+				var node = CreateResponseNode(x.Position, x);
+				
+				lineNode.OutputPort.ConnectPort(node.InputPort);
+
+				OnPortsConnected(node.InputPort, lineNode.OutputPort);
 			}
 		}
 
-		private void OnNewNodeRequested(Vector2 position, NodeTypes nodeTypes)
-		{
-			switch (nodeTypes)
-			{
-				case NodeTypes.Line:
-					CreateLineNode(position, new Line());
-					break;
-				case NodeTypes.Response:
-					CreateResponseNode(position, new Response());
-					break;
-			}
-		}
-
-		private void CreateResponseNode(Vector2 position, Response response)
-		{
-			ResponseNode newResponse = new ResponseNode(position, Settings.ResponseNode.Width, Settings.ResponseNode.Height);
-
-			newResponse.SetContent(response);
-			newResponse.RepaintNeeded += RepaintNeeded;
-			newResponse.InputPort.DragStarted += OnInputConnectionRequested;
-			newResponse.OutputPort.DragStarted += OnInputConnectionRequested;
-			_inputables.UnionWith(newResponse.GetAllInputables());
-			_drawables.Add(newResponse);
-			
-			RepaintNeeded?.Invoke();
-		}
-
-		private Curve temporaryCurve;
-		
-		private void OnInputConnectionRequested(Port port)
-		{
-			temporaryCurve.SetStart(port.Position);
-			temporaryCurve.SetEnd(port.Position);
-			
-			port.DragEnded += OnDragEnded;
-			port.Drag += OnDrag;
-		}
-
-		private void OnDrag(Port port, Event current)
-		{
-			temporaryCurve.SetEnd(current.mousePosition);
-		}
-
-		private void OnDragEnded(Port port)
-		{
-			temporaryCurve.Clear();
-			port.Drag -= OnDrag;
-			port.DragEnded -= OnDragEnded;
-		}
+		public event Action RepaintNeeded;
+		public static Curve TemporaryCurve { get; private set; }
 
 		public void Draw(Event current)
 		{
@@ -112,7 +66,7 @@ namespace SimpleDialogSystem.Editor.Scripts.Dialog.Window
 
 			_currentInputHolder = null;
 
-			foreach (IInputable x in _inputables)
+			foreach (IInputtable x in _inputables)
 			{
 				if (x.CanUseInput(current))
 				{
@@ -133,17 +87,81 @@ namespace SimpleDialogSystem.Editor.Scripts.Dialog.Window
 			_currentInputHolder?.Clear();
 		}
 
-		private void CreateLineNode(Vector2 position, Line content = default)
+		private void OnNewNodeRequested(Vector2 position, NodeTypes nodeTypes)
 		{
-			LineNode newLine = new LineNode(position, Settings.LineNode.Width, Settings.LineNode.Height);
+			switch (nodeTypes)
+			{
+				case NodeTypes.Line:
+					CreateLineNode(position, new Line());
+					break;
+				case NodeTypes.Response:
+					CreateResponseNode(position, new Response());
+					break;
+			}
+		}
 
-			newLine.SetContent(content);
-			newLine.RepaintNeeded += RepaintNeeded;
+		private ResponseContentNode CreateResponseNode(Vector2 position, Response response)
+		{
+			ResponseContentNode newResponseContent = new ResponseContentNode(position, Settings.ResponseNode.Width, Settings.ResponseNode.Height);
 
-			_inputables.UnionWith(newLine.GetAllInputables());
-			_drawables.Add(newLine);
-			
+			newResponseContent.SetContent(response);
+			newResponseContent.RepaintNeeded += RepaintNeeded;
+			newResponseContent.PortDragEnd += OnPortDragEnd;
+			newResponseContent.PortsConnected += OnPortsConnected;
+			_inputables.UnionWith(newResponseContent.GetAllInputables());
+			_drawables.Add(newResponseContent);
+
 			RepaintNeeded?.Invoke();
+
+			return newResponseContent;
+		}
+
+		private void OnPortsConnected(Port input, Port output)
+		{
+			Curve drawable = new Curve(input.Position, output.Position);
+			input.Owner.Dragged += current => { drawable.MoveStart(current.delta); };
+			output.Owner.Dragged += current => { drawable.MoveEnd(current.delta); };
+
+			input.ConnectionRemoved += port =>
+			                           {
+					                           _drawables.Remove(drawable);
+			                           };
+			
+			output.ConnectionRemoved += port =>
+			                            {
+					                            _drawables.Remove(drawable);
+			                            };
+			
+			_drawables.Add(drawable);
+		}
+
+		private void OnPortDragEnd(Port port, Event current)
+		{
+			foreach (IInputtable x in _inputables)
+			{
+				if (x.CanUseInput(current))
+				{
+					x.OnDragged(port);
+					break;
+				}
+			}
+		}
+
+		private LineContentNode CreateLineNode(Vector2 position, Line content = default)
+		{
+			LineContentNode newLineContent = new LineContentNode(position, Settings.LineNode.Width, Settings.LineNode.Height);
+
+			newLineContent.SetContent(content);
+			newLineContent.RepaintNeeded += RepaintNeeded;
+			newLineContent.PortDragEnd += OnPortDragEnd;
+			newLineContent.PortsConnected += OnPortsConnected;
+
+			_inputables.UnionWith(newLineContent.GetAllInputables());
+			_drawables.Add(newLineContent);
+
+			RepaintNeeded?.Invoke();
+
+			return newLineContent;
 		}
 	}
 }

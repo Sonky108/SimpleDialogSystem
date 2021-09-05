@@ -8,6 +8,11 @@ namespace SimpleDialogSystem.Editor.Scripts.NodeEditor.Utils
 	{
 		public int Compare(IDrawable x, IDrawable y)
 		{
+			if (x.Equals(y))
+			{
+				return 0;
+			}
+			
 			if (x is Background)
 			{
 				return 1;
@@ -18,11 +23,13 @@ namespace SimpleDialogSystem.Editor.Scripts.NodeEditor.Utils
 				return 1;
 			}
 			
-			if (x.GetType() == typeof(Node<>))
+			if (x.GetType() == typeof(ContentNode<>))
 			{
 				return 1;
 			}
 
+			
+			
 			return 1;
 		}
 	}

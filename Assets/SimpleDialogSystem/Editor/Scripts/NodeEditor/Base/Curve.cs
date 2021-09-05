@@ -31,6 +31,16 @@ namespace SimpleDialogSystem.Editor.Scripts.NodeEditor.Base
 			_start = start;
 		}
 
+		public void MoveStart(Vector3 delta)
+		{
+			_start += delta;
+		}
+		
+		public void MoveEnd(Vector3 delta)
+		{
+			_end += delta;
+		}
+		
 		public void SetEnd(Vector3 end)
 		{
 			_end = end;
