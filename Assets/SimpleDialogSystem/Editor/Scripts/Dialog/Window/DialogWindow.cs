@@ -32,18 +32,14 @@ namespace SimpleDialogSystem.Editor.Scripts.Dialog.Window
 			_drawables.Add(_background);
 			_drawables.Add(TemporaryCurve);
 
-			LineContentNode lineNode = CreateLineNode(Data.OpeningLine.Position, Data.OpeningLine);
+			foreach (var x in Data.Lines)
+			{
+				LineContentNode lineNode = CreateLineNode(x.Position, x);
+			}
 
-			foreach (Response x in Data.OpeningLine.Response)
+			foreach (Response x in Data.Responses)
 			{
 				ResponseContentNode node = CreateResponseNode(x.Position, x);
-
-				Connection connection = lineNode.OutputPort.ConnectPort(node.InputPort);
-
-				if (connection != null)
-				{
-					OnPortsConnected(connection);
-				}
 			}
 		}
 
@@ -140,10 +136,14 @@ namespace SimpleDialogSystem.Editor.Scripts.Dialog.Window
 			switch (nodeTypes)
 			{
 				case NodeTypes.Line:
-					CreateLineNode(position, new Line());
+					Line content = new Line(position);
+					Data.Lines.Add(content);
+					CreateLineNode(position, content);
 					break;
 				case NodeTypes.Response:
-					CreateResponseNode(position, new Response());
+					Response response = new Response(position);
+					Data.Responses.Add(response);
+					CreateResponseNode(position, response);
 					break;
 			}
 		}

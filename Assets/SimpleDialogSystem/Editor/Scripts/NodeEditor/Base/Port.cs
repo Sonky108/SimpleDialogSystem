@@ -119,7 +119,7 @@ namespace SimpleDialogSystem.Editor.Scripts.NodeEditor.Base
 				}
 
 				PortsConnected?.Invoke(connection);
-
+				Owner.OnNewConnection(connection);
 				return connection;
 			}
 

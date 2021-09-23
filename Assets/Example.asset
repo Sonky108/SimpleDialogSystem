@@ -12,19 +12,5 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 868fc356f7d0475ca4884ecf316db223, type: 3}
   m_Name: Example
   m_EditorClassIdentifier: 
-  OpeningLine:
-    Position: {x: 100, y: 341}
-    Message: Line
-    Response:
-    - Position: {x: 458, y: 335}
-      Message: response
-      Line:
-        Position: {x: 0, y: 0}
-        Message: 
-        Response: []
-    - Position: {x: 304, y: 152}
-      Message: response2
-      Line:
-        Position: {x: 0, y: 0}
-        Message: 
-        Response: []
+  Lines: []
+  Responses: []

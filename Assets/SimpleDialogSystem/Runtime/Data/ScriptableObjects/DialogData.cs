@@ -1,4 +1,5 @@
-﻿using SimpleDialogSystem.Runtime.Settings;
+﻿using System.Collections.Generic;
+using SimpleDialogSystem.Runtime.Settings;
 using UnityEngine;
 
 namespace SimpleDialogSystem.Runtime.Data.ScriptableObjects
@@ -6,6 +7,7 @@ namespace SimpleDialogSystem.Runtime.Data.ScriptableObjects
 	[CreateAssetMenu(menuName = Names.DialogDataPath)]
 	public class DialogData : ScriptableObject
 	{
-		public Line OpeningLine;
+		public List<Line> Lines;
+		public List<Response> Responses;
 	}
 }
