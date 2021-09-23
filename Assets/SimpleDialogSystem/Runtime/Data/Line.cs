@@ -1,8 +1,9 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 
 namespace SimpleDialogSystem.Runtime.Data
 {
-	[System.Serializable]
+	[Serializable]
 	public class Line : NodeContent
 	{
 		public string Message;

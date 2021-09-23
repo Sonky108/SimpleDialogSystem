@@ -10,14 +10,14 @@
 			return _message.GetMessage();
 		}
 
-		public Line GetLine()
-		{
-			return _line;
-		}
-
 		public bool IsResponseAvailable()
 		{
 			return true;
+		}
+
+		public Line GetLine()
+		{
+			return _line;
 		}
 	}
 }

@@ -1,8 +1,9 @@
-﻿using UnityEngine;
+﻿using System;
+using UnityEngine;
 
 namespace SimpleDialogSystem.Runtime.Data
 {
-	[System.Serializable]
+	[Serializable]
 	public class Response : NodeContent
 	{
 		public string Message;
