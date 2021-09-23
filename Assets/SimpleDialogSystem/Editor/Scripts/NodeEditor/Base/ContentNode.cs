@@ -16,8 +16,6 @@ namespace SimpleDialogSystem.Editor.Scripts.NodeEditor.Base
 		protected T Content;
 		private Rect _contentRect;
 
-		public event Action<Port, Event> PortDragEnd;
-		
 		public ContentNode(Vector2 position, float width, float height, GUIStyle style = default) : base(position, width, height)
 		{
 			if (style != default)
@@ -36,6 +34,8 @@ namespace SimpleDialogSystem.Editor.Scripts.NodeEditor.Base
 			InputPort.DragEnded += OnDragEnded;
 			OutputPort.DragEnded += OnDragEnded;
 		}
+
+		public event Action<Port, Event> PortDragEnd;
 
 		public List<IInputtable> GetAllInputables()
 		{

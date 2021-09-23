@@ -8,14 +8,11 @@ namespace SimpleDialogSystem.Editor.Scripts.NodeEditor.Utils
 {
 	public class DrawableComparer : IComparer<IDrawable>
 	{
-		private static Dictionary<Type, int> _renderOrder = new Dictionary<Type, int>()
+		private static readonly Dictionary<Type, int> _renderOrder = new Dictionary<Type, int>
 		{
-			{typeof(Background), 0},
-			{typeof(Curve), 1},
-			{typeof(Connection), 2},
-			{typeof(Node), 3},
+			{typeof(Background), 0}, {typeof(Curve), 1}, {typeof(Connection), 2}, {typeof(Node), 3},
 		};
-		
+
 		public int Compare(IDrawable x, IDrawable y)
 		{
 			if (x.Equals(y))
@@ -30,7 +27,7 @@ namespace SimpleDialogSystem.Editor.Scripts.NodeEditor.Utils
 			{
 				return 1;
 			}
-			
+
 			return xOrder - yOrder;
 		}
 	}

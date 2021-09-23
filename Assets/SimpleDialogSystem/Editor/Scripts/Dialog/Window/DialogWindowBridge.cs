@@ -10,7 +10,12 @@ namespace SimpleDialogSystem.Editor.Scripts.Dialog.Window
 	{
 		private static DialogWindow _window;
 		private static Object _data;
-		public static event Action OnWindowClosed;
+
+		private void OnDestroy()
+		{
+			OnWindowClosed?.Invoke();
+			OnWindowClosed = null;
+		}
 
 		private void OnGUI()
 		{
@@ -29,6 +34,8 @@ namespace SimpleDialogSystem.Editor.Scripts.Dialog.Window
 			_window.OnLostFocus();
 		}
 
+		public static event Action OnWindowClosed;
+
 		public static void ShowWindow(Object data)
 		{
 			_data = data;
@@ -38,12 +45,6 @@ namespace SimpleDialogSystem.Editor.Scripts.Dialog.Window
 			dialogWindowBridge.titleContent = new GUIContent(data.name);
 
 			_window.RepaintNeeded += () => dialogWindowBridge.Repaint();
-		}
-
-		private void OnDestroy()
-		{
-			OnWindowClosed?.Invoke();
-			OnWindowClosed = null;
 		}
 	}
 }

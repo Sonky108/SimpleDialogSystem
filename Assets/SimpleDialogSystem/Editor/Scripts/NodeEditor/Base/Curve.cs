@@ -15,7 +15,7 @@ namespace SimpleDialogSystem.Editor.Scripts.NodeEditor.Base
 			_start = start;
 			_end = end;
 		}
-		
+
 		public void Draw()
 		{
 			if (Vector2.Distance(_end, _start) < Settings.MinimalCurveDrawDistance)
@@ -35,12 +35,12 @@ namespace SimpleDialogSystem.Editor.Scripts.NodeEditor.Base
 		{
 			_start += delta;
 		}
-		
+
 		public void MoveEnd(Vector3 delta)
 		{
 			_end += delta;
 		}
-		
+
 		public void SetEnd(Vector3 end)
 		{
 			_end = end;

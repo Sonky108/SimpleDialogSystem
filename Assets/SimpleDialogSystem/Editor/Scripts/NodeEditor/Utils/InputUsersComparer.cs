@@ -13,7 +13,7 @@ namespace SimpleDialogSystem.Editor.Scripts.NodeEditor.Utils
 			{
 				return -1;
 			}
-			
+
 			return equalType;
 		}
 	}

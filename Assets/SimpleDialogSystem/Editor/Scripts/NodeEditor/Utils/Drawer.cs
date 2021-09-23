@@ -13,9 +13,6 @@ namespace SimpleDialogSystem.Editor.Scripts.NodeEditor.Utils
 
 	public class LineNodeDrawer : Drawer<Line>
 	{
-		public override void Draw(Line content, Rect contentRect)
-		{
-			
-		}
+		public override void Draw(Line content, Rect contentRect) { }
 	}
 }

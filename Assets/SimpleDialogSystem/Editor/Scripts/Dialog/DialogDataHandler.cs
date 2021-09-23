@@ -25,11 +25,6 @@ namespace SimpleDialogSystem.Editor.Scripts.Dialog
 			return false;
 		}
 
-		private static void ClearPrefs()
-		{
-			EditorPrefs.DeleteKey(lastopened);
-		}
-		
 		[DidReloadScripts]
 		public static void ReopenOnCompiled()
 		{
@@ -37,6 +32,11 @@ namespace SimpleDialogSystem.Editor.Scripts.Dialog
 			{
 				Open(EditorPrefs.GetInt(lastopened), 0);
 			}
+		}
+
+		private static void ClearPrefs()
+		{
+			EditorPrefs.DeleteKey(lastopened);
 		}
 	}
 }

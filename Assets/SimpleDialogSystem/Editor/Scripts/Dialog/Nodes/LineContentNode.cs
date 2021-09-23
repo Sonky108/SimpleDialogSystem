@@ -6,7 +6,7 @@ namespace SimpleDialogSystem.Editor.Scripts.Dialog.Nodes
 {
 	public class LineContentNode : ContentNode<Line>
 	{
-		private GUIContent _title;
+		private readonly GUIContent _title;
 
 		public LineContentNode(Vector2 position, float width, float height, GUIStyle style = default) : base(position, width, height, style)
 		{

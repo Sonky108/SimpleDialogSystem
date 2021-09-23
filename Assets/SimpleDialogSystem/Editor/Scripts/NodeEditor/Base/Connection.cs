@@ -21,17 +21,17 @@ namespace SimpleDialogSystem.Editor.Scripts.NodeEditor.Base
 			_drawableImplementation.Draw();
 		}
 
+		public Port From { get; }
+		public Port To { get; }
+
 		public override bool Equals(object obj)
 		{
 			if (obj is Connection connection)
 			{
 				return From == connection.From && To == connection.To || From == connection.To && To == connection.From;
 			}
-			
+
 			return base.Equals(obj);
 		}
-
-		public Port From { get; }
-		public Port To { get; }
 	}
 }

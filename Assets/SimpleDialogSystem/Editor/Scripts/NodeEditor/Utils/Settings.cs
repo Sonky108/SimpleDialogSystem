@@ -18,7 +18,7 @@ namespace SimpleDialogSystem.Editor.Scripts.NodeEditor.Utils
 			background.SetPixel(0, 0, BackgroundColor);
 			background.Apply();
 			BackgroundStyle = new GUIStyle {normal = new GUIStyleState {background = background}};
-			
+
 			Texture2D backgroundTexture = new Texture2D(1, 1) {wrapMode = TextureWrapMode.Repeat};
 			backgroundTexture.SetPixel(0, 0, NodeBackgroundColor);
 			backgroundTexture.Apply();

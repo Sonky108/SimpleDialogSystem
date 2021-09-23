@@ -27,10 +27,7 @@ namespace SimpleDialogSystem.Editor.Scripts.NodeEditor.Base
 			return true;
 		}
 
-		public void OnDragged(IUserInputtable userInputtable)
-		{
-			
-		}
+		public void OnDragged(IUserInputtable userInputtable) { }
 
 		public void Draw()
 		{

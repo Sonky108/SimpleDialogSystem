@@ -38,7 +38,7 @@ namespace SimpleDialogSystem.Editor.Scripts.Dialog.Window
 			{
 				ResponseContentNode node = CreateResponseNode(x.Position, x);
 
-				var connection = lineNode.OutputPort.ConnectPort(node.InputPort);
+				Connection connection = lineNode.OutputPort.ConnectPort(node.InputPort);
 
 				if (connection != null)
 				{
@@ -101,18 +101,13 @@ namespace SimpleDialogSystem.Editor.Scripts.Dialog.Window
 			newLineContent.OutputPort.PortsConnected += OnPortsConnected;
 			newLineContent.InputPort.ConnectionRemoved += OnConnectionRemove;
 			newLineContent.OutputPort.ConnectionRemoved += OnConnectionRemove;
-			
+
 			_inputables.UnionWith(newLineContent.GetAllInputables());
 			_drawables.Add(newLineContent);
 
 			RepaintNeeded?.Invoke();
 
 			return newLineContent;
-		}
-
-		private void OnConnectionRemove(Connection obj)
-		{
-			_drawables.Remove(obj);
 		}
 
 		private ResponseContentNode CreateResponseNode(Vector2 position, Response response)
@@ -126,13 +121,18 @@ namespace SimpleDialogSystem.Editor.Scripts.Dialog.Window
 			newResponseContent.OutputPort.PortsConnected += OnPortsConnected;
 			newResponseContent.InputPort.ConnectionRemoved += OnConnectionRemove;
 			newResponseContent.OutputPort.ConnectionRemoved += OnConnectionRemove;
-			
+
 			_inputables.UnionWith(newResponseContent.GetAllInputables());
 			_drawables.Add(newResponseContent);
 
 			RepaintNeeded?.Invoke();
 
 			return newResponseContent;
+		}
+
+		private void OnConnectionRemove(Connection obj)
+		{
+			_drawables.Remove(obj);
 		}
 
 		private void OnNewNodeRequested(Vector2 position, NodeTypes nodeTypes)

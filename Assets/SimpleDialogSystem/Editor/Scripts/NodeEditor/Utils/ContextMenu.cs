@@ -17,12 +17,12 @@ namespace SimpleDialogSystem.Editor.Scripts.NodeEditor.Utils
 		{
 			_menu.AddItem(new GUIContent(name), false, () => { onSelected?.Invoke(); });
 		}
-		
+
 		public void AddAction(GUIContent content, Action onSelected)
 		{
 			_menu.AddItem(content, false, () => { onSelected?.Invoke(); });
 		}
-		
+
 		public void Show()
 		{
 			_menu.ShowAsContext();

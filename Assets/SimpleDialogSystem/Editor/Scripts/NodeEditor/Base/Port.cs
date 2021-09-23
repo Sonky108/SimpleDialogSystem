@@ -32,29 +32,9 @@ namespace SimpleDialogSystem.Editor.Scripts.NodeEditor.Base
 			_contextMenu.AddAction(Names.ClearAllConnections, ClearAllConnections);
 		}
 
-		private void ClearAllConnections()
-		{
-			for (int i = _connections.Count - 1; i >= 0; i--)
-			{
-				var x = _connections[i];
-				RemoveConnection(x);
-			}
-
-			_connections.Clear();
-		}
-
-		public void RemoveConnection(Connection connection)
-		{
-			if (_connections.Remove(connection))
-			{
-				ConnectionRemoved?.Invoke(connection);
-				connection.To.RemoveConnection(connection);
-			}
-		}
-		
-		public event Action<Port, Event> DragEnded;
 		public event Action<Connection> PortsConnected;
 		public event Action<Connection> ConnectionRemoved;
+		public event Action<Port, Event> DragEnded;
 		public int InputPriority => Utils.InputPriority.PORT;
 
 		public bool CanUseInput(Event current)
@@ -109,7 +89,7 @@ namespace SimpleDialogSystem.Editor.Scripts.NodeEditor.Base
 
 		public bool IsConnectedTo(Port port)
 		{
-			foreach (var x in _connections)
+			foreach (Connection x in _connections)
 			{
 				if (x.To == port)
 				{
@@ -119,7 +99,7 @@ namespace SimpleDialogSystem.Editor.Scripts.NodeEditor.Base
 
 			return false;
 		}
-		
+
 		public Connection ConnectPort(Port port)
 		{
 			if (CanConnectPort(port))
@@ -133,16 +113,36 @@ namespace SimpleDialogSystem.Editor.Scripts.NodeEditor.Base
 				}
 
 				PortsConnected?.Invoke(connection);
-			
+
 				return connection;
 			}
 
 			return null;
 		}
 
+		public void RemoveConnection(Connection connection)
+		{
+			if (_connections.Remove(connection))
+			{
+				ConnectionRemoved?.Invoke(connection);
+				connection.To.RemoveConnection(connection);
+			}
+		}
+
 		private bool CanConnectPort(Port port)
 		{
 			return !IsConnectedTo(port) && port.Owner != Owner;
+		}
+
+		private void ClearAllConnections()
+		{
+			for (int i = _connections.Count - 1; i >= 0; i--)
+			{
+				Connection x = _connections[i];
+				RemoveConnection(x);
+			}
+
+			_connections.Clear();
 		}
 
 		private void OnDragStarted()

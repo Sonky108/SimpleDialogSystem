@@ -1,6 +1,4 @@
-﻿using UnityEngine;
-
-namespace SimpleDialogSystem.Editor.Scripts.Dialog
+﻿namespace SimpleDialogSystem.Editor.Scripts.Dialog
 {
 	public static class Settings
 	{
@@ -12,7 +10,7 @@ namespace SimpleDialogSystem.Editor.Scripts.Dialog
 			public static int Width = 100;
 			public static int Height = 100;
 		}
-		
+
 		public static class ResponseNode
 		{
 			public static int Width = 200;
