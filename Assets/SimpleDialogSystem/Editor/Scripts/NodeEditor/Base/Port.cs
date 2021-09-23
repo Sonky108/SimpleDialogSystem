@@ -15,7 +15,8 @@ namespace SimpleDialogSystem.Editor.Scripts.NodeEditor.Base
 		private readonly Draggable _draggable;
 		private readonly List<Connection> _connections;
 		private Rect _rect;
-
+		private List<Type> _canBeConnectedToOwnerTypes = new List<Type>();
+		
 		public Port(float x, float y, Node owner)
 		{
 			_rect = new Rect(x, y, Settings.PortHeight, Settings.PortHeight);
@@ -32,6 +33,11 @@ namespace SimpleDialogSystem.Editor.Scripts.NodeEditor.Base
 			_contextMenu.AddAction(Names.ClearAllConnections, ClearAllConnections);
 		}
 
+		public void SetAvailableOwnerTypes(List<Type> ownerTypes)
+		{
+			_canBeConnectedToOwnerTypes = ownerTypes;
+		}
+		
 		public event Action<Connection> PortsConnected;
 		public event Action<Connection> ConnectionRemoved;
 		public event Action<Port, Event> DragEnded;
@@ -131,7 +137,18 @@ namespace SimpleDialogSystem.Editor.Scripts.NodeEditor.Base
 
 		private bool CanConnectPort(Port port)
 		{
-			return !IsConnectedTo(port) && port.Owner != Owner;
+			bool properOwnerType = false;
+
+			foreach (var x in _canBeConnectedToOwnerTypes)
+			{
+				if (x.IsAssignableFrom(port.Owner.GetType()))
+				{
+					properOwnerType = true;
+					break;
+				}
+			}
+			
+			return !IsConnectedTo(port) && port.Owner != Owner && port.GetType() != GetType() && properOwnerType;
 		}
 
 		private void ClearAllConnections()

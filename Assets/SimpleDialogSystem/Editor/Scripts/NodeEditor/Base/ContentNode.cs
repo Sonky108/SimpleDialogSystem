@@ -33,8 +33,14 @@ namespace SimpleDialogSystem.Editor.Scripts.NodeEditor.Base
 
 			InputPort.DragEnded += OnDragEnded;
 			OutputPort.DragEnded += OnDragEnded;
+			
+			InputPort.SetAvailableOwnerTypes(InputOwnerTypes);
+			OutputPort.SetAvailableOwnerTypes(OutputOwnerTypes);
 		}
 
+		public abstract List<Type> InputOwnerTypes { get; }
+		public abstract List<Type> OutputOwnerTypes { get; }
+		
 		public event Action<Port, Event> PortDragEnd;
 
 		public List<IInputtable> GetAllInputables()
