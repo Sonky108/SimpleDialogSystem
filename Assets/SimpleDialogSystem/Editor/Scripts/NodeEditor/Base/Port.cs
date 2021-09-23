@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using SimpleDialogSystem.Editor.Scripts.Dialog.Window;
 using SimpleDialogSystem.Editor.Scripts.NodeEditor.Controllers;
 using SimpleDialogSystem.Editor.Scripts.NodeEditor.Interfaces;
 using SimpleDialogSystem.Editor.Scripts.NodeEditor.Utils;
@@ -12,7 +13,7 @@ namespace SimpleDialogSystem.Editor.Scripts.NodeEditor.Base
 	{
 		private readonly ContextMenu _contextMenu;
 		private readonly Draggable _draggable;
-		private readonly List<Port> _connectedPorts;
+		private readonly List<Connection> _connections;
 		private Rect _rect;
 
 		public Port(float x, float y, Node owner)
@@ -21,7 +22,7 @@ namespace SimpleDialogSystem.Editor.Scripts.NodeEditor.Base
 
 			Owner = owner;
 
-			_connectedPorts = new List<Port>();
+			_connections = new List<Connection>();
 
 			_draggable = new Draggable(_rect, OnDrag, this);
 			_draggable.DragStarted += OnDragStarted;
@@ -33,28 +34,27 @@ namespace SimpleDialogSystem.Editor.Scripts.NodeEditor.Base
 
 		private void ClearAllConnections()
 		{
-			foreach (var x in _connectedPorts)
+			for (int i = _connections.Count - 1; i >= 0; i--)
 			{
-				ConnectionRemoved?.Invoke(x);
-				x.RemoveConnection(this);
+				var x = _connections[i];
+				RemoveConnection(x);
 			}
-			
-			_connectedPorts.Clear();
+
+			_connections.Clear();
 		}
 
-		public void RemoveConnection(Port port)
+		public void RemoveConnection(Connection connection)
 		{
-			if (_connectedPorts.Remove(port))
+			if (_connections.Remove(connection))
 			{
-				ConnectionRemoved?.Invoke(port);
+				ConnectionRemoved?.Invoke(connection);
+				connection.To.RemoveConnection(connection);
 			}
 		}
 		
 		public event Action<Port, Event> DragEnded;
-		public event Action<Port, Event> Drag;
-		public event Action<Port, Port> PortsConnected;
-		public event Action<Port> DragStarted;
-		public event Action<Port> ConnectionRemoved;
+		public event Action<Connection> PortsConnected;
+		public event Action<Connection> ConnectionRemoved;
 		public int InputPriority => Utils.InputPriority.PORT;
 
 		public bool CanUseInput(Event current)
@@ -69,22 +69,9 @@ namespace SimpleDialogSystem.Editor.Scripts.NodeEditor.Base
 
 		public void OnDragged(IUserInputtable userInputtable)
 		{
-			if (this is InputPort inputPort && userInputtable is OutputPort outputPort)
+			if (userInputtable is Port port && !IsConnectedTo(port))
 			{
-				if (inputPort.Owner != outputPort.Owner)
-				{
-					PortsConnected?.Invoke(inputPort, outputPort);
-					outputPort.PortsConnected?.Invoke(inputPort, outputPort);
-				}
-			}
-
-			if (this is OutputPort output && userInputtable is InputPort input)
-			{
-				if (input.Owner != output.Owner)
-				{
-					PortsConnected?.Invoke(input, output);
-					input.PortsConnected?.Invoke(input, output);
-				}
+				ConnectPort(port);
 			}
 		}
 
@@ -105,7 +92,7 @@ namespace SimpleDialogSystem.Editor.Scripts.NodeEditor.Base
 
 		public void Draw()
 		{
-			GUI.Box(_rect, new GUIContent(_connectedPorts.Count.ToString()), Settings.PortStyle);
+			GUI.Box(_rect, new GUIContent(_connections.Count.ToString()), Settings.PortStyle);
 		}
 
 		public void Clear() { }
@@ -122,51 +109,70 @@ namespace SimpleDialogSystem.Editor.Scripts.NodeEditor.Base
 
 		public bool IsConnectedTo(Port port)
 		{
-			return _connectedPorts.Contains(port);
+			foreach (var x in _connections)
+			{
+				if (x.To == port)
+				{
+					return true;
+				}
+			}
+
+			return false;
 		}
 		
-		public bool ConnectPort(Port port)
+		public Connection ConnectPort(Port port)
 		{
-			if (IsConnectedTo(port))
+			if (CanConnectPort(port))
 			{
-				return false;
-			}
+				Connection connection = new Connection(this, port);
+				_connections.Add(connection);
+
+				if (!port.IsConnectedTo(this))
+				{
+					port.ConnectPort(this);
+				}
+
+				PortsConnected?.Invoke(connection);
 			
-			_connectedPorts.Add(port);
-
-			if (!port.IsConnectedTo(this))
-			{
-				port.ConnectPort(this);
+				return connection;
 			}
 
-			return true;
+			return null;
+		}
+
+		private bool CanConnectPort(Port port)
+		{
+			return !IsConnectedTo(port) && port.Owner != Owner;
 		}
 
 		private void OnDragStarted()
 		{
-			DragStarted?.Invoke(this);
+			DialogWindow.TemporaryCurve.SetStart(Position);
+			DialogWindow.TemporaryCurve.SetEnd(Position);
 		}
 
 		private void OnDragEnded(Event current)
 		{
+			DialogWindow.TemporaryCurve.Clear();
+
 			DragEnded?.Invoke(this, current);
 		}
 
 		private void OnDrag(Event current)
 		{
-			Drag?.Invoke(this, current);
+			DialogWindow.TemporaryCurve.SetEnd(current.mousePosition);
 		}
 
-		public List<Node> GetConnectedNodes()
-		{
-			var result = new List<Node>();
-			
-			foreach (var x in _connectedPorts)
-			{
-				result.Add(x.Owner);
-			}
-
-			return result;
-		}
+		// public List<Node> GetConnectedNodes()
+		// {
+		// 	var result = new List<Node>();
+		// 	
+		// 	foreach (var x in _connectedPorts)
+		// 	{
+		// 		result.Add(x.Owner);
+		// 	}
+		//
+		// 	return result;
+		// }
 	}
 }

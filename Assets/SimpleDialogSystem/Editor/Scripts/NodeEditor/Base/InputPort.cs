@@ -1,6 +1,4 @@
-﻿using SimpleDialogSystem.Runtime.Data;
-
-namespace SimpleDialogSystem.Editor.Scripts.NodeEditor.Base
+﻿namespace SimpleDialogSystem.Editor.Scripts.NodeEditor.Base
 {
 	public class InputPort : Port
 	{

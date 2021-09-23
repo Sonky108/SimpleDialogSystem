@@ -17,7 +17,6 @@ namespace SimpleDialogSystem.Editor.Scripts.NodeEditor.Base
 		private Rect _contentRect;
 
 		public event Action<Port, Event> PortDragEnd;
-		public event Action<Port, Port> PortsConnected;
 		
 		public ContentNode(Vector2 position, float width, float height, GUIStyle style = default) : base(position, width, height)
 		{
@@ -34,8 +33,8 @@ namespace SimpleDialogSystem.Editor.Scripts.NodeEditor.Base
 			_inputs.Add(OutputPort);
 			_inputs.Add(InputPort);
 
-			InputPort.DragStarted += OnInputConnectionRequested;
-			OutputPort.DragStarted += OnInputConnectionRequested;
+			InputPort.DragEnded += OnDragEnded;
+			OutputPort.DragEnded += OnDragEnded;
 		}
 
 		public List<IInputtable> GetAllInputables()
@@ -69,39 +68,9 @@ namespace SimpleDialogSystem.Editor.Scripts.NodeEditor.Base
 			return _contentRect;
 		}
 
-		private void OnInputConnectionRequested(Port port)
-		{
-			DialogWindow.TemporaryCurve.SetStart(port.Position);
-			DialogWindow.TemporaryCurve.SetEnd(port.Position);
-
-			port.PortsConnected += OnPortsConnected;
-			port.DragEnded += OnDragEnded;
-			port.Drag += OnDrag;
-		}
-
-		private void OnPortsConnected(Port input, Port output)
-		{
-			if (input.ConnectPort(output))
-			{
-				PortsConnected?.Invoke(input, output);
-			}
-		}
-
-		private void OnDrag(Port port, Event current)
-		{
-			DialogWindow.TemporaryCurve.SetEnd(current.mousePosition);
-		}
-
 		private void OnDragEnded(Port port, Event current)
 		{
-			port.Drag -= OnDrag;
-			port.DragEnded -= OnDragEnded;
-
 			PortDragEnd?.Invoke(port, current);
-			
-			port.PortsConnected -= OnPortsConnected;
-			
-			DialogWindow.TemporaryCurve.Clear();
 		}
 
 		private void DrawPorts()

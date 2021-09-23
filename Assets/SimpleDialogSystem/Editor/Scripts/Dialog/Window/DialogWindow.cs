@@ -32,15 +32,18 @@ namespace SimpleDialogSystem.Editor.Scripts.Dialog.Window
 			_drawables.Add(_background);
 			_drawables.Add(TemporaryCurve);
 
-			var lineNode = CreateLineNode(Data.OpeningLine.Position, Data.OpeningLine);
+			LineContentNode lineNode = CreateLineNode(Data.OpeningLine.Position, Data.OpeningLine);
 
 			foreach (Response x in Data.OpeningLine.Response)
 			{
-				var node = CreateResponseNode(x.Position, x);
-				
-				lineNode.OutputPort.ConnectPort(node.InputPort);
+				ResponseContentNode node = CreateResponseNode(x.Position, x);
 
-				OnPortsConnected(node.InputPort, lineNode.OutputPort);
+				var connection = lineNode.OutputPort.ConnectPort(node.InputPort);
+
+				if (connection != null)
+				{
+					OnPortsConnected(connection);
+				}
 			}
 		}
 
@@ -87,6 +90,51 @@ namespace SimpleDialogSystem.Editor.Scripts.Dialog.Window
 			_currentInputHolder?.Clear();
 		}
 
+		private LineContentNode CreateLineNode(Vector2 position, Line content = default)
+		{
+			LineContentNode newLineContent = new LineContentNode(position, Settings.LineNode.Width, Settings.LineNode.Height);
+
+			newLineContent.SetContent(content);
+			newLineContent.RepaintNeeded += RepaintNeeded;
+			newLineContent.PortDragEnd += OnPortDragEnd;
+			newLineContent.InputPort.PortsConnected += OnPortsConnected;
+			newLineContent.OutputPort.PortsConnected += OnPortsConnected;
+			newLineContent.InputPort.ConnectionRemoved += OnConnectionRemove;
+			newLineContent.OutputPort.ConnectionRemoved += OnConnectionRemove;
+			
+			_inputables.UnionWith(newLineContent.GetAllInputables());
+			_drawables.Add(newLineContent);
+
+			RepaintNeeded?.Invoke();
+
+			return newLineContent;
+		}
+
+		private void OnConnectionRemove(Connection obj)
+		{
+			_drawables.Remove(obj);
+		}
+
+		private ResponseContentNode CreateResponseNode(Vector2 position, Response response)
+		{
+			ResponseContentNode newResponseContent = new ResponseContentNode(position, Settings.ResponseNode.Width, Settings.ResponseNode.Height);
+
+			newResponseContent.SetContent(response);
+			newResponseContent.RepaintNeeded += RepaintNeeded;
+			newResponseContent.PortDragEnd += OnPortDragEnd;
+			newResponseContent.InputPort.PortsConnected += OnPortsConnected;
+			newResponseContent.OutputPort.PortsConnected += OnPortsConnected;
+			newResponseContent.InputPort.ConnectionRemoved += OnConnectionRemove;
+			newResponseContent.OutputPort.ConnectionRemoved += OnConnectionRemove;
+			
+			_inputables.UnionWith(newResponseContent.GetAllInputables());
+			_drawables.Add(newResponseContent);
+
+			RepaintNeeded?.Invoke();
+
+			return newResponseContent;
+		}
+
 		private void OnNewNodeRequested(Vector2 position, NodeTypes nodeTypes)
 		{
 			switch (nodeTypes)
@@ -100,39 +148,9 @@ namespace SimpleDialogSystem.Editor.Scripts.Dialog.Window
 			}
 		}
 
-		private ResponseContentNode CreateResponseNode(Vector2 position, Response response)
+		private void OnPortsConnected(Connection connection)
 		{
-			ResponseContentNode newResponseContent = new ResponseContentNode(position, Settings.ResponseNode.Width, Settings.ResponseNode.Height);
-
-			newResponseContent.SetContent(response);
-			newResponseContent.RepaintNeeded += RepaintNeeded;
-			newResponseContent.PortDragEnd += OnPortDragEnd;
-			newResponseContent.PortsConnected += OnPortsConnected;
-			_inputables.UnionWith(newResponseContent.GetAllInputables());
-			_drawables.Add(newResponseContent);
-
-			RepaintNeeded?.Invoke();
-
-			return newResponseContent;
-		}
-
-		private void OnPortsConnected(Port input, Port output)
-		{
-			Curve drawable = new Curve(input.Position, output.Position);
-			input.Owner.Dragged += current => { drawable.MoveStart(current.delta); };
-			output.Owner.Dragged += current => { drawable.MoveEnd(current.delta); };
-
-			input.ConnectionRemoved += port =>
-			                           {
-					                           _drawables.Remove(drawable);
-			                           };
-			
-			output.ConnectionRemoved += port =>
-			                            {
-					                            _drawables.Remove(drawable);
-			                            };
-			
-			_drawables.Add(drawable);
+			_drawables.Add(connection);
 		}
 
 		private void OnPortDragEnd(Port port, Event current)
@@ -145,23 +163,6 @@ namespace SimpleDialogSystem.Editor.Scripts.Dialog.Window
 					break;
 				}
 			}
-		}
-
-		private LineContentNode CreateLineNode(Vector2 position, Line content = default)
-		{
-			LineContentNode newLineContent = new LineContentNode(position, Settings.LineNode.Width, Settings.LineNode.Height);
-
-			newLineContent.SetContent(content);
-			newLineContent.RepaintNeeded += RepaintNeeded;
-			newLineContent.PortDragEnd += OnPortDragEnd;
-			newLineContent.PortsConnected += OnPortsConnected;
-
-			_inputables.UnionWith(newLineContent.GetAllInputables());
-			_drawables.Add(newLineContent);
-
-			RepaintNeeded?.Invoke();
-
-			return newLineContent;
 		}
 	}
 }
