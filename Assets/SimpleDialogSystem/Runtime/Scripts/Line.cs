@@ -1,11 +1,18 @@
 ﻿using System;
+using System.Collections.Generic;
 
 namespace SimpleDialogSystem.Runtime.Scripts
 {
 	public class Line : IMessageProvider
 	{
+		
 		private Message _message;
-		private Response[] _responses;
+		public List<Response> Responses = new List<Response>();
+
+		public Line(Data.Line line)
+		{
+			_message = new Message(line.Message);
+		}
 
 		public string GetMessage()
 		{
@@ -14,12 +21,12 @@ namespace SimpleDialogSystem.Runtime.Scripts
 
 		public Response GetResponse(int i)
 		{
-			if (i < 0 || i > _responses.Length)
+			if (i < 0 || i > Responses.Count)
 			{
-				throw new ArgumentOutOfRangeException($"Trying to get {i} response in line {_message.GetMessage()} while there is {_responses.Length} response(s) available!");
+				throw new ArgumentOutOfRangeException($"Trying to get {i} response in line {_message.GetMessage()} while there is {Responses.Count} response(s) available!");
 			}
 
-			return _responses[i];
+			return Responses[i];
 		}
 	}
 }

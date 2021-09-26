@@ -9,6 +9,10 @@ namespace SimpleDialogSystem.Editor.Scripts.NodeEditor.Utils
 		public static Color TitleColor = Color.grey;
 		public static Color PortColor = new Color(1f, 0.66f, 0.27f);
 		public static float MinimalCurveDrawDistance = 5f;
+		public static float TitleHeight = 20;
+		public static float PortHeight = 14;
+		public static float ToggleHeight = 14;
+		public static float Space = 5;
 		public static int LeftMouseButton = 0;
 		public static int RightMouseButton = 1;
 
@@ -36,8 +40,6 @@ namespace SimpleDialogSystem.Editor.Scripts.NodeEditor.Utils
 			PortStyle = new GUIStyle {normal = new GUIStyleState {background = portTexture}};
 		}
 
-		public static float TitleHeight => 20;
-		public static float PortHeight => 14;
 		public static GUIStyle NodeBackgroundStyle { get; }
 		public static GUIStyle BackgroundStyle { get; }
 		public static GUIStyle TitleStyle { get; }

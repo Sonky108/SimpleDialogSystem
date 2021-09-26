@@ -32,14 +32,43 @@ namespace SimpleDialogSystem.Editor.Scripts.Dialog.Window
 			_drawables.Add(_background);
 			_drawables.Add(TemporaryCurve);
 
+			var lines = new Dictionary<string, LineContentNode>();
+			var missingConnection = new Dictionary<string, List<LineContentNode>>();
+			
 			foreach (var x in Data.Lines)
 			{
 				LineContentNode lineNode = CreateLineNode(x.Position, x);
+				lines.Add(x.Guid, lineNode);
+
+				foreach (var y in x.ResponseIDs)
+				{
+					if (missingConnection.TryGetValue(y, out var list))
+					{
+						list.Add(lineNode);	
+					}
+					else
+					{
+						missingConnection.Add(y, new List<LineContentNode>(){lineNode});
+					}
+				}
 			}
 
 			foreach (Response x in Data.Responses)
 			{
 				ResponseContentNode node = CreateResponseNode(x.Position, x);
+
+				if (!string.IsNullOrEmpty(node.Content.LineGuid) && lines.ContainsKey(node.Content.LineGuid))
+				{
+					node.OutputPort.ConnectPort(lines[node.Content.LineGuid].InputPort);
+				}
+
+				if (missingConnection.ContainsKey(x.Guid))
+				{
+					foreach (var y in missingConnection[x.Guid])
+					{
+						y.OutputPort.ConnectPort(node.InputPort);
+					}
+				}
 			}
 		}
 

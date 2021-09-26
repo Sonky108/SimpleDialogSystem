@@ -1,5 +1,4 @@
 ﻿using System;
-using UnityEditor;
 using UnityEngine;
 
 namespace SimpleDialogSystem.Runtime.Data
@@ -13,7 +12,7 @@ namespace SimpleDialogSystem.Runtime.Data
 
 		public Response(Vector2 position) : base(position)
 		{
-			Guid = GUID.Generate().ToString();
+			Guid = System.Guid.NewGuid().ToString();
 		}
 	}
 }

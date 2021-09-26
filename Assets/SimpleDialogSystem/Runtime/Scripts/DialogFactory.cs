@@ -6,7 +6,7 @@ namespace SimpleDialogSystem.Runtime.Scripts
 	{
 		public Dialog Create(DialogData data)
 		{
-			return new Dialog();
+			return new Dialog(data);
 		}
 	}
 }

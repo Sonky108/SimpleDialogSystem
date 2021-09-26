@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using UnityEditor;
 using UnityEngine;
 
 namespace SimpleDialogSystem.Runtime.Data
@@ -10,11 +9,12 @@ namespace SimpleDialogSystem.Runtime.Data
 	{
 		public string Guid;
 		public string Message;
-		public List<string> ResponseIDs;
-
+		public List<string> ResponseIDs = new List<string>();
+		public bool IsStartingLine;
+		
 		public Line(Vector2 position) : base(position)
 		{
-			Guid = GUID.Generate().ToString();
+			Guid = System.Guid.NewGuid().ToString();
 		}
 	}
 }

@@ -2,9 +2,14 @@
 {
 	public class Response : IMessageProvider
 	{
-		private Line _line;
+		public Line Line;
 		private Message _message;
 
+		public Response(Data.Response response)
+		{
+			_message = new Message(response.Message);
+		}
+		
 		public string GetMessage()
 		{
 			return _message.GetMessage();
@@ -17,7 +22,7 @@
 
 		public Line GetLine()
 		{
-			return _line;
+			return Line;
 		}
 	}
 }

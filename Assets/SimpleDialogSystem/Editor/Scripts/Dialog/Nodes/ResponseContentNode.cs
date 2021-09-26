@@ -13,7 +13,7 @@ namespace SimpleDialogSystem.Editor.Scripts.Dialog.Nodes
 		protected override List<Type> OutputOwnerTypes => new List<Type> {typeof(LineContentNode)};
 		public override void OnNewConnection(Connection connection)
 		{
-			if (connection.To.Owner is LineContentNode lineContentNode)
+			if (connection.To is InputPort && connection.To.Owner is LineContentNode lineContentNode)
 			{
 				Content.LineGuid = lineContentNode.Content.Guid;
 			}
